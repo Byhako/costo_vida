@@ -1,42 +1,39 @@
-import { useState, useEffect } from 'preact/hooks';
+import { useState } from 'preact/hooks';
 import { useApp } from '../context/AppContext';
 import { COMMON_CATEGORIES, CURRENCIES } from '../constants/currencies';
 import { calculateScenario, calculateItemImpact } from '../utils/calculations';
 import { X, Clock } from 'lucide-preact';
+import { useModalExit } from '../hooks/useModalExit';
+import type { Scenario, ItemCost } from '../types';
 
 const POPULAR_EMOJIS = ['📱', '👟', '🚗', '✈️', '☕', '🎮', '🏠', '🍷', '💻', '🏋️', '🎧', '🛵', '🍔', '📚', '👕'];
 
 export function QuickItemModal() {
-  const { editingItemInfo, closeItemModal, saveItem, scenarios } = useApp();
+  const { editingItemInfo, scenarios } = useApp();
 
   if (!editingItemInfo) return null;
+  const scenario = scenarios.find((s) => s.id === editingItemInfo.scenarioId);
+  if (!scenario) return null;
 
-  const currentScenario = scenarios.find((s) => s.id === editingItemInfo.scenarioId);
-  const existingItem = editingItemInfo.item;
+  return (
+    <QuickItemForm
+      key={`${scenario.id}:${editingItemInfo.item?.id ?? 'new'}`}
+      currentScenario={scenario}
+      existingItem={editingItemInfo.item}
+    />
+  );
+}
+
+function QuickItemForm({ currentScenario, existingItem }: { currentScenario: Scenario; existingItem?: ItemCost }) {
+  const { closing, runExit } = useModalExit();
+  const { closeItemModal, saveItem } = useApp();
 
   const [name, setName] = useState(existingItem?.name || '');
   const [price, setPrice] = useState<number>(existingItem?.price || 0);
   const [category, setCategory] = useState(existingItem?.category || COMMON_CATEGORIES[0].label);
   const [emoji, setEmoji] = useState(existingItem?.emoji || '📱');
-  const [notes, setNotes] = useState(existingItem?.notes || '');
-
-  useEffect(() => {
-    if (existingItem) {
-      setName(existingItem.name);
-      setPrice(existingItem.price);
-      setCategory(existingItem.category || COMMON_CATEGORIES[0].label);
-      setEmoji(existingItem.emoji || '📱');
-      setNotes(existingItem.notes || '');
-    } else {
-      setName('');
-      setPrice(0);
-      setCategory(COMMON_CATEGORIES[0].label);
-      setEmoji('📱');
-      setNotes('');
-    }
-  }, [existingItem]);
-
-  if (!currentScenario) return null;
+  const [notes] = useState(existingItem?.notes || '');
+  const [priceError, setPriceError] = useState(false);
 
   const calc = calculateScenario(currentScenario.incomeConfig);
   const impact = calculateItemImpact(price, calc.realHourlyRate);
@@ -45,21 +42,29 @@ export function QuickItemModal() {
   const handleSubmit = (e: Event) => {
     e.preventDefault();
     if (!name.trim()) return;
+    if (!(Number.isFinite(price) && price > 0)) {
+      setPriceError(true);
+      return;
+    }
 
     saveItem(currentScenario.id, {
       id: existingItem?.id,
       name: name.trim(),
-      price: Math.max(0, price),
+      price,
       category,
       emoji,
       notes: notes.trim() || undefined,
     });
 
-    closeItemModal();
+    handleClose();
+  };
+
+  const handleClose = () => {
+    runExit(closeItemModal);
   };
 
   return (
-    <div className="modal-overlay" onClick={closeItemModal}>
+    <div className={`modal-overlay${closing ? ' is-closing' : ''}`} onClick={handleClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <div>
@@ -70,7 +75,7 @@ export function QuickItemModal() {
               Para el escenario: <strong>{currentScenario.name}</strong>
             </span>
           </div>
-          <button className="btn btn-ghost btn-icon" onClick={closeItemModal}>
+          <button className="btn btn-ghost btn-icon" onClick={handleClose}>
             <X size={18} />
           </button>
         </div>
@@ -131,15 +136,20 @@ export function QuickItemModal() {
                 <span className="input-prefix">{currencyInfo.symbol}</span>
                 <input
                   type="number"
-                  min="0"
                   step="any"
                   className="form-input input-with-prefix"
                   placeholder="0"
                   value={price || ''}
-                  onInput={(e) => setPrice(parseFloat((e.target as HTMLInputElement).value) || 0)}
-                  required
+                  aria-invalid={priceError}
+                  aria-describedby={priceError ? 'quick-item-price-error' : undefined}
+                  onInput={(e) => { setPrice(parseFloat((e.target as HTMLInputElement).value) || 0); setPriceError(false); }}
                 />
               </div>
+              {priceError && (
+                <p id="quick-item-price-error" role="alert" className="form-error">
+                  Ingresa un precio mayor que 0.
+                </p>
+              )}
             </div>
 
             {/* Category */}
@@ -190,7 +200,7 @@ export function QuickItemModal() {
           </div>
 
           <div className="modal-footer">
-            <button type="button" className="btn btn-secondary" onClick={closeItemModal}>
+            <button type="button" className="btn btn-secondary" onClick={handleClose}>
               Cancelar
             </button>
             <button type="submit" className="btn btn-primary">

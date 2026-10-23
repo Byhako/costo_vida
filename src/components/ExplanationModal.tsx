@@ -1,4 +1,5 @@
 import { useApp } from '../context/AppContext';
+import { useModalExit } from '../hooks/useModalExit';
 import {
   X,
   BookOpen,
@@ -10,11 +11,13 @@ import {
 
 export function ExplanationModal() {
   const { isExplanationOpen, closeExplanation } = useApp();
+  const { closing, runExit } = useModalExit();
+  const handleClose = () => runExit(closeExplanation);
 
   if (!isExplanationOpen) return null;
 
   return (
-    <div className="modal-overlay" onClick={closeExplanation}>
+    <div className={`modal-overlay${closing ? ' is-closing' : ''}`} onClick={handleClose}>
       <div
         className="modal-content"
         style={{ maxWidth: '750px' }}
@@ -41,7 +44,7 @@ export function ExplanationModal() {
               </span>
             </div>
           </div>
-          <button className="btn btn-ghost btn-icon" onClick={closeExplanation}>
+          <button className="btn btn-ghost btn-icon" onClick={handleClose}>
             <X size={20} />
           </button>
         </div>
@@ -218,7 +221,7 @@ export function ExplanationModal() {
         </div>
 
         <div className="modal-footer">
-          <button className="btn btn-primary" onClick={closeExplanation}>
+          <button className="btn btn-primary" onClick={handleClose}>
             ¡Entendido, volver a la aplicación!
           </button>
         </div>

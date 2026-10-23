@@ -4,7 +4,6 @@ export interface CurrencyInfo {
   code: CurrencyCode;
   symbol: string;
   name: string;
-  rateToUSD: number; // e.g. 1 USD = rateToUSD in local currency (e.g. 4000 for COP, 1.36 for CAD)
 }
 
 export type IncomeFrequency = 'monthly' | 'hourly';
@@ -38,7 +37,6 @@ export interface Scenario {
   id: string;
   name: string;
   currency: CurrencyCode;
-  customRateToUSD?: number; // User override for exchange rate to USD
   incomeConfig: IncomeConfig;
   items: ItemCost[];
   colorTheme?: string;
@@ -63,4 +61,22 @@ export interface ItemTimeImpact {
   months: number;    // ~173.33 work hours
   emotionalText: string;
   intensity: 'low' | 'moderate' | 'high' | 'critical';
+}
+
+/** Unidades de cada moneda por 1 USD (architecture D1, D3). */
+export type ExchangeRates = Record<CurrencyCode, number>;
+
+/** null = valores de ejemplo; 'manual' = editadas a mano; otro string = ISO del momento de la descarga (D6). */
+export type RatesUpdatedAt = string | null;
+
+export interface SavedRates {
+  rates: ExchangeRates;
+  ratesUpdatedAt: RatesUpdatedAt;
+}
+
+/** Entrada del índice de artículos agrupado por nombre normalizado (D10). */
+export interface ItemIndexEntry {
+  key: string;   // nombre sin espacios en los extremos y en minúsculas
+  label: string; // nombre del primer artículo encontrado, sin espacios en los extremos
+  byScenario: Map<string, { scenario: Scenario; item: ItemCost }>; // id de escenario -> primer artículo con esa clave
 }

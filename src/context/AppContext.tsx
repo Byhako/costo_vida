@@ -1,8 +1,7 @@
 import { createContext } from 'preact';
-import { useContext, useEffect, useState, useMemo } from 'preact/hooks';
+import { useContext, useEffect, useState, useMemo, useRef } from 'preact/hooks';
 import type { ComponentChildren } from 'preact';
-import type { Scenario, ItemCost, CurrencyCode } from '../types';
-import { CURRENCIES } from '../constants/currencies';
+import type { Scenario, ItemCost, CurrencyCode, ExchangeRates, RatesUpdatedAt, SavedRates } from '../types';
 import {
   loadSavedScenarios,
   saveScenarios,
@@ -11,6 +10,9 @@ import {
   loadSavedTheme,
   saveTheme,
   exportDataAsJSON,
+  loadSavedRates,
+  saveRates,
+  stripLegacyScenarioFields,
 } from '../utils/storage';
 import { DEFAULT_SCENARIOS } from '../constants/defaults';
 import confetti from 'canvas-confetti';
@@ -19,6 +21,13 @@ export interface ToastMessage {
   id: string;
   text: string;
   type: 'success' | 'info' | 'warning' | 'error';
+}
+
+export interface ConfirmOptions {
+  title: string;
+  message: string;
+  confirmLabel?: string; // por defecto 'Confirmar'
+  cancelLabel?: string;  // por defecto 'Cancelar'
 }
 
 interface AppContextType {
@@ -36,6 +45,9 @@ interface AppContextType {
   openItemModal: (scenarioId: string, item?: ItemCost) => void;
   closeItemModal: () => void;
   showToast: (text: string, type?: ToastMessage['type']) => void;
+  confirmRequest: ConfirmOptions | null;
+  requestConfirm: (options: ConfirmOptions) => Promise<boolean>;
+  resolveConfirm: (result: boolean) => void;
 
   // Scenario operations
   addScenario: (name: string, currency: CurrencyCode, baseOnScenarioId?: string) => void;
@@ -51,6 +63,12 @@ interface AppContextType {
   saveItem: (scenarioId: string, itemData: Omit<ItemCost, 'id' | 'createdAt'> & { id?: string }) => void;
   deleteItem: (scenarioId: string, itemId: string) => void;
   duplicateItem: (scenarioId: string, itemId: string) => void;
+
+  // Exchange rates (global, persisted)
+  rates: ExchangeRates;
+  ratesUpdatedAt: RatesUpdatedAt;
+  setManualRate: (code: CurrencyCode, ratePerUSD: number) => void;
+  applyDownloadedRates: (fresh: Partial<ExchangeRates>) => void;
 }
 
 const AppContext = createContext<AppContextType | null>(null);
@@ -62,6 +80,9 @@ export function AppProvider({ children }: { children: ComponentChildren }) {
   const [isExplanationOpen, setIsExplanationOpen] = useState(false);
   const [editingItemInfo, setEditingItemInfo] = useState<{ scenarioId: string; item?: ItemCost } | null>(null);
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
+  const [savedRates, setSavedRates] = useState<SavedRates>(loadSavedRates);
+  const [confirmRequest, setConfirmRequest] = useState<ConfirmOptions | null>(null);
+  const confirmResolverRef = useRef<((result: boolean) => void) | null>(null);
 
   // Apply theme to document root
   useEffect(() => {
@@ -73,6 +94,11 @@ export function AppProvider({ children }: { children: ComponentChildren }) {
   useEffect(() => {
     saveScenarios(scenarios);
   }, [scenarios]);
+
+  // Persist exchange rates
+  useEffect(() => {
+    saveRates(savedRates);
+  }, [savedRates]);
 
   // Handle active tab change
   const setActiveTab = (tabId: string) => {
@@ -100,17 +126,30 @@ export function AppProvider({ children }: { children: ComponentChildren }) {
   };
   const closeItemModal = () => setEditingItemInfo(null);
 
+  const requestConfirm = (options: ConfirmOptions): Promise<boolean> => {
+    confirmResolverRef.current?.(false); // una petición previa sin responder se da por cancelada
+    return new Promise<boolean>((resolve) => {
+      confirmResolverRef.current = resolve;
+      setConfirmRequest(options);
+    });
+  };
+
+  const resolveConfirm = (result: boolean) => {
+    const resolve = confirmResolverRef.current;
+    confirmResolverRef.current = null;
+    setConfirmRequest(null);
+    resolve?.(result);
+  };
+
   // Scenario operations
   const addScenario = (name: string, currency: CurrencyCode, baseOnScenarioId?: string) => {
     let baseScenario = scenarios.find((s) => s.id === baseOnScenarioId);
     const newId = 'scen-' + Date.now();
-    const currencyInfo = CURRENCIES[currency] || CURRENCIES.USD;
 
     const newScenario: Scenario = {
       id: newId,
       name: name.trim() || `Nuevo Escenario (${currency})`,
       currency,
-      customRateToUSD: currencyInfo.rateToUSD,
       incomeConfig: baseScenario
         ? JSON.parse(JSON.stringify(baseScenario.incomeConfig))
         : {
@@ -197,7 +236,7 @@ export function AppProvider({ children }: { children: ComponentChildren }) {
       showToast('El archivo no contiene un formato de escenarios válido', 'error');
       return;
     }
-    setScenarios(imported);
+    setScenarios(stripLegacyScenarioFields(imported));
     setActiveTab(imported[0].id);
     showToast('¡Datos importados con éxito!', 'success');
     confetti({ particleCount: 70, spread: 60, origin: { y: 0.6 } });
@@ -283,6 +322,22 @@ export function AppProvider({ children }: { children: ComponentChildren }) {
     showToast('Artículo duplicado', 'info');
   };
 
+  // Exchange rates
+  const setManualRate = (code: CurrencyCode, ratePerUSD: number) => {
+    if (!(Number.isFinite(ratePerUSD) && ratePerUSD > 0)) return;
+    setSavedRates((prev) => ({
+      rates: { ...prev.rates, [code]: ratePerUSD },
+      ratesUpdatedAt: 'manual',
+    }));
+  };
+
+  const applyDownloadedRates = (fresh: Partial<ExchangeRates>) => {
+    setSavedRates((prev) => ({
+      rates: { ...prev.rates, ...fresh },
+      ratesUpdatedAt: new Date().toISOString(),
+    }));
+  };
+
   const value = useMemo(
     () => ({
       scenarios,
@@ -298,6 +353,9 @@ export function AppProvider({ children }: { children: ComponentChildren }) {
       openItemModal,
       closeItemModal,
       showToast,
+      confirmRequest,
+      requestConfirm,
+      resolveConfirm,
       addScenario,
       updateScenario,
       renameScenario,
@@ -309,8 +367,12 @@ export function AppProvider({ children }: { children: ComponentChildren }) {
       saveItem,
       deleteItem,
       duplicateItem,
+      rates: savedRates.rates,
+      ratesUpdatedAt: savedRates.ratesUpdatedAt,
+      setManualRate,
+      applyDownloadedRates,
     }),
-    [scenarios, activeTab, theme, isExplanationOpen, toasts, editingItemInfo]
+    [scenarios, activeTab, theme, isExplanationOpen, toasts, editingItemInfo, confirmRequest, savedRates]
   );
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

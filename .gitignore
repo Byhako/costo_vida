@@ -45,3 +45,6 @@ Thumbs.db
 # Vite test / coverage
 coverage/
 .turbo/
+
+# Artefactos locales de Infra.Code
+.infracode/
