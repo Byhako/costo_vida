@@ -32,11 +32,7 @@ export function ScenarioConfig({ scenario }: ScenarioConfigProps) {
   };
 
   const handleCurrencyChange = (newCurr: CurrencyCode) => {
-    const info = CURRENCIES[newCurr];
-    updateScenario(scenario.id, {
-      currency: newCurr,
-      customRateToUSD: info ? info.rateToUSD : 1,
-    });
+    updateScenario(scenario.id, { currency: newCurr });
   };
 
   return (
@@ -375,35 +371,6 @@ export function ScenarioConfig({ scenario }: ScenarioConfigProps) {
                     Vestirse, alistarse, llamadas
                   </span>
                 </div>
-              </div>
-
-              {/* Exchange rate to USD */}
-              <div
-                className="form-group"
-                style={{
-                  marginTop: '0.5rem',
-                  paddingTop: '0.75rem',
-                  borderTop: '1px solid var(--border-subtle)',
-                }}
-              >
-                <label className="form-label">
-                  <span>Tasa de Cambio hacia 1 USD (para Comparativa Global)</span>
-                  <span className="badge badge-info">
-                    1 USD = {scenario.customRateToUSD || currencyInfo.rateToUSD} {scenario.currency}
-                  </span>
-                </label>
-                <input
-                  type="number"
-                  min="0.0001"
-                  step="any"
-                  className="form-input"
-                  value={scenario.customRateToUSD ?? currencyInfo.rateToUSD}
-                  onInput={(e) =>
-                    updateScenario(scenario.id, {
-                      customRateToUSD: parseFloat((e.target as HTMLInputElement).value) || 1,
-                    })
-                  }
-                />
               </div>
             </div>
           )}

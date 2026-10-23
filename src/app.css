@@ -310,14 +310,6 @@
 }
 
 /* Comparison View Styling */
-.comparison-hero {
-  background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(99, 102, 241, 0.1) 100%);
-  border: 1px solid rgba(16, 185, 129, 0.25);
-  border-radius: var(--radius-xl);
-  padding: 1.75rem;
-  margin-bottom: 2rem;
-}
-
 .benchmark-selector-card {
   background: var(--bg-surface);
   border: 1px solid var(--border-subtle);
@@ -419,6 +411,10 @@
   background-color: var(--bg-surface-hover);
 }
 
+.data-table tr:hover .best-value {
+  opacity: 0.65;;
+}
+
 /* Toast Notifications */
 .toast-container {
   position: fixed;
@@ -445,4 +441,39 @@
   font-size: 0.875rem;
   font-weight: 600;
   animation: scaleUp 200ms ease;
+}
+
+/* Confirm Modal */
+.confirm-modal {
+  max-width: 440px;
+}
+
+.confirm-modal-body {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.confirm-modal-icon {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--danger-50);
+  color: var(--danger-500);
+}
+
+.confirm-modal-title {
+  margin: 0 0 0.35rem 0;
+  font-size: 1.1rem;
+}
+
+.confirm-modal-message {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--text-muted);
 }

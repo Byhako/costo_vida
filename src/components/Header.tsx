@@ -19,6 +19,7 @@ export function Header() {
     importScenariosData,
     resetAllToDefaults,
     showToast,
+    requestConfirm,
   } = useApp();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -95,10 +96,13 @@ export function Header() {
 
         <button
           className="btn btn-ghost btn-icon"
-          onClick={() => {
-            if (confirm('¿Restablecer los escenarios a los valores de ejemplo iniciales? Perderás cambios no guardados.')) {
-              resetAllToDefaults();
-            }
+          onClick={async () => {
+            const ok = await requestConfirm({
+              title: 'Restablecer escenarios',
+              message: 'Los escenarios volverán a los valores de ejemplo iniciales y perderás los cambios no guardados.',
+              confirmLabel: 'Restablecer',
+            });
+            if (ok) resetAllToDefaults();
           }}
           title="Restablecer escenarios de ejemplo"
         >

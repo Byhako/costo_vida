@@ -6,6 +6,7 @@ import { ItemList } from './components/ItemList';
 import { ComparisonView } from './components/ComparisonView';
 import { QuickItemModal } from './components/QuickItemModal';
 import { ExplanationModal } from './components/ExplanationModal';
+import { ConfirmModal } from './components/ConfirmModal';
 import { ToastContainer } from './components/Toast';
 import './app.css';
 
@@ -44,6 +45,7 @@ function MainLayout() {
       {/* Modals & Toasts */}
       <QuickItemModal />
       <ExplanationModal />
+      <ConfirmModal />
       <ToastContainer />
     </div>
   );

@@ -16,10 +16,11 @@ interface ItemCardProps {
 }
 
 export function ItemCard({ item, scenario }: ItemCardProps) {
-  const { openItemModal, duplicateItem, deleteItem } = useApp();
+  const { openItemModal, duplicateItem, deleteItem, requestConfirm } = useApp();
 
   const calc = calculateScenario(scenario.incomeConfig);
   const impact = calculateItemImpact(item.price, calc.realHourlyRate);
+  const hasValidPrice = Number.isFinite(item.price) && item.price > 0;
 
   // Meter percentage relative to 1 full work month (~160h)
   const monthPercentage = Math.min(100, (impact.hours / 160) * 100);
@@ -53,7 +54,7 @@ export function ItemCard({ item, scenario }: ItemCardProps) {
             </div>
           </div>
           <div className="item-price-tag">
-            {formatCurrency(item.price, scenario.currency)}
+            {hasValidPrice ? formatCurrency(item.price, scenario.currency) : '—'}
           </div>
         </div>
 
@@ -62,12 +63,16 @@ export function ItemCard({ item, scenario }: ItemCardProps) {
           <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
             <div>
               <div className="time-hero-number">
-                {impact.hours < 1
+                {!hasValidPrice
+                  ? '—'
+                  : impact.hours < 1
                   ? `${Math.round(impact.hours * 60)} min`
                   : `${impact.hours.toFixed(1)} h`}
               </div>
               <div className="time-hero-subtitle">
-                {impact.days < 1
+                {!hasValidPrice
+                  ? 'Precio no válido: edita el artículo'
+                  : impact.days < 1
                   ? 'Menos de 1 jornada laboral'
                   : `${impact.days.toFixed(1)} días laborales (${(impact.days / 5).toFixed(1)} sem)`}
               </div>
@@ -149,10 +154,13 @@ export function ItemCard({ item, scenario }: ItemCardProps) {
 
         <button
           className="btn btn-danger-ghost btn-sm btn-icon"
-          onClick={() => {
-            if (confirm(`¿Eliminar "${item.name}"?`)) {
-              deleteItem(scenario.id, item.id);
-            }
+          onClick={async () => {
+            const ok = await requestConfirm({
+              title: 'Eliminar artículo',
+              message: `Se eliminará "${item.name}" de este escenario. Esta acción no se puede deshacer.`,
+              confirmLabel: 'Eliminar',
+            });
+            if (ok) deleteItem(scenario.id, item.id);
           }}
           title="Eliminar artículo"
         >

@@ -22,6 +22,7 @@ export function TabNavigation() {
     renameScenario,
     duplicateScenario,
     deleteScenario,
+    requestConfirm,
   } = useApp();
 
   const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
@@ -350,12 +351,16 @@ export function TabNavigation() {
                   type="button"
                   className="btn btn-danger-ghost btn-sm"
                   style={{ justifyContent: 'flex-start', width: '100%' }}
-                  onClick={() => {
-                    if (confirm(`¿Eliminar el escenario "${targetScenario.name}"?`)) {
-                      deleteScenario(targetScenario.id);
-                    }
+                  onClick={async () => {
+                    const { id, name } = targetScenario;
                     setActiveMenuId(null);
                     setMenuPosition(null);
+                    const ok = await requestConfirm({
+                      title: 'Eliminar escenario',
+                      message: `Se eliminará el escenario "${name}" con todos sus artículos. Esta acción no se puede deshacer.`,
+                      confirmLabel: 'Eliminar',
+                    });
+                    if (ok) deleteScenario(id);
                   }}
                 >
                   <Trash2 size={13} />

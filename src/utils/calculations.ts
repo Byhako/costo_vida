@@ -1,4 +1,4 @@
-import type { IncomeConfig, ItemTimeImpact, ScenarioCalculations } from '../types';
+import type { IncomeConfig, ItemIndexEntry, ItemTimeImpact, Scenario, ScenarioCalculations } from '../types';
 
 export const WEEKS_PER_MONTH = 4.3333;
 export const STANDARD_WORKDAY_HOURS = 8;
@@ -137,4 +137,32 @@ function generateEmotionalNarrative(
 
   const months = weeks / WEEKS_PER_MONTH;
   return `¡Impacto mayúsculo! Este artículo te exige ${months.toFixed(1)} meses enteros de tu existencia laboral (${hours.toFixed(0)} horas reales invertidas). Todo tu sudor, transporte y estrés de ese periodo van a este pago.`;
+}
+
+export function normalizeItemKey(name: string | undefined | null): string {
+  return (name ?? '').trim().toLowerCase();
+}
+
+export function buildItemIndex(scenarios: Scenario[]): ItemIndexEntry[] {
+  const map = new Map<string, ItemIndexEntry>();
+  for (const scenario of scenarios) {
+    for (const item of scenario.items) {
+      const k = normalizeItemKey(item.name);
+      if (!k || !(Number(item.price) > 0)) continue;
+      let entry = map.get(k);
+      if (!entry) {
+        entry = { key: k, label: item.name.trim(), byScenario: new Map() };
+        map.set(k, entry);
+      }
+      if (!entry.byScenario.has(scenario.id)) {
+        entry.byScenario.set(scenario.id, { scenario, item });
+      }
+    }
+  }
+  return [...map.values()].sort((a, b) => b.byScenario.size - a.byScenario.size);
+}
+
+export function hoursForPrice(price: number, realHourlyRate: number): number {
+  if (!(Number.isFinite(price) && price > 0 && realHourlyRate > 0)) return NaN;
+  return price / realHourlyRate;
 }

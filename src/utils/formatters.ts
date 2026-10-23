@@ -1,5 +1,6 @@
 import type { CurrencyCode } from '../types';
 import { CURRENCIES } from '../constants/currencies';
+import { STANDARD_WORKDAY_HOURS, STANDARD_WORKWEEK_HOURS, WEEKS_PER_MONTH } from './calculations';
 
 export function formatCurrency(
   amount: number,
@@ -60,4 +61,37 @@ export function formatTimeSpan(hours: number): {
 
 export function formatPercent(value: number): string {
   return `${value.toFixed(1)}%`;
+}
+
+export function formatNumber(value: number, maxDigits = 1): string {
+  return (Object.is(value, -0) ? 0 : value).toLocaleString('es-CO', { maximumFractionDigits: maxDigits });
+}
+
+export function formatHours(hours: number): string {
+  if (!Number.isFinite(hours)) return '—';
+  const totalMin = Math.round(hours * 60);
+  if (totalMin < 60) return `${Math.max(1, totalMin)} min`;
+  if (hours < 10) {
+    const h = Math.floor(totalMin / 60);
+    const m = totalMin % 60;
+    return m > 0 ? `${h} h ${m} min` : `${h} h`;
+  }
+  return `${formatNumber(hours, 0)} h`;
+}
+
+export function humanizeHours(hours: number): string {
+  if (!Number.isFinite(hours)) return '—';
+  if (hours < STANDARD_WORKDAY_HOURS) return formatHours(hours);
+  const days = hours / STANDARD_WORKDAY_HOURS;
+  if (days < 10) return `${formatNumber(days)} días`;
+  const weeks = hours / STANDARD_WORKWEEK_HOURS;
+  const months = weeks / WEEKS_PER_MONTH;
+  if (months < 2) return `${formatNumber(weeks)} semanas`;
+  return `${formatNumber(months)} meses`;
+}
+
+export function formatRateValue(value: number): number | '' {
+  if (!(Number.isFinite(value) && value > 0)) return '';
+  if (value >= 1) return Math.round(value * 10000) / 10000;
+  return Number(value.toPrecision(6));
 }

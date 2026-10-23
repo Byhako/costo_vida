@@ -5,7 +5,6 @@ export const DEFAULT_SCENARIOS: Scenario[] = [
     id: 'scen-colombia',
     name: '🇨🇴 Mi perfil en Colombia',
     currency: 'COP',
-    customRateToUSD: 4150,
     colorTheme: '#0284c7', // Sky Blue
     incomeConfig: {
       incomeFrequency: 'monthly',
@@ -64,7 +63,6 @@ export const DEFAULT_SCENARIOS: Scenario[] = [
     id: 'scen-canada',
     name: '🇨🇦 Mi proyección en Canadá',
     currency: 'CAD',
-    customRateToUSD: 1.36,
     colorTheme: '#e11d48', // Crimson Red
     incomeConfig: {
       incomeFrequency: 'hourly',
@@ -118,64 +116,5 @@ export const DEFAULT_SCENARIOS: Scenario[] = [
         createdAt: 5,
       },
     ],
-  },
-  {
-    id: 'scen-spain',
-    name: '🇪🇸 Perfil de mi hermana en España',
-    currency: 'EUR',
-    customRateToUSD: 0.92,
-    colorTheme: '#f59e0b', // Amber / Spanish Gold
-    incomeConfig: {
-      incomeFrequency: 'monthly',
-      nominalAmount: 2100, // 2,100 EUR brutos mensuales
-      weeklyWorkHours: 40,
-      taxDeductionsMonthly: 420, // IRPF + Seg. Social (~20%)
-      commuteExpensesMonthly: 60, // Abono transporte Madrid
-      workOtherExpensesMonthly: 120, // Menús de mediodía
-      commuteHoursWeekly: 5, // Metro 1h diaria
-      prepHoursWeekly: 2,
-    },
-    items: [
-      {
-        id: 'item-esp-1',
-        name: 'Tenis Deportivos de Marca',
-        price: 110,
-        category: 'Ropa y Calzado',
-        emoji: '👟',
-        createdAt: 1,
-      },
-      {
-        id: 'item-esp-2',
-        name: 'Smartphone Gama Media-Alta',
-        price: 650,
-        category: 'Tecnología',
-        emoji: '📱',
-        createdAt: 2,
-      },
-      {
-        id: 'item-esp-3',
-        name: 'Salida a Cenar en Pareja',
-        price: 65,
-        category: 'Alimentación y Salidas',
-        emoji: '🍷',
-        createdAt: 3,
-      },
-      {
-        id: 'item-esp-4',
-        name: 'Escapada de Fin de Semana',
-        price: 320,
-        category: 'Transporte y Viajes',
-        emoji: '✈️',
-        createdAt: 4,
-      },
-      {
-        id: 'item-esp-5',
-        name: 'Suscripción Mensual Gimnasio',
-        price: 39,
-        category: 'Salud y Cuidado',
-        emoji: '🏋️',
-        createdAt: 5,
-      },
-    ],
-  },
+  }
 ];
