@@ -5,15 +5,21 @@ Calcula cuánto te cuesta realmente cada compra, no en dinero, sino en **horas d
 > "No pagamos las cosas con dinero, las pagamos con el tiempo de vida que entregamos para ganar ese dinero."
 > — José "Pepe" Mujica
 
-![Comparativa General: un mismo artículo en distintos escenarios, matriz de horas, matriz financiera y tasas de cambio](docs/screenshots/comparativa.png)
+---
+
+## Escenarios
 
 ![Pestaña de un escenario: parámetros de ingresos y artículos expresados en horas y días laborales](docs/screenshots/escenario.png)
+
+## Comparativa entre escenarios
+
+![Comparativa General: un mismo artículo en distintos escenarios, matriz de horas, matriz financiera y tasas de cambio](docs/screenshots/comparativa.png)
 
 ---
 
 ## La idea
 
-El precio de una etiqueta engaña: un teléfono no "cuesta" 2.600.000 pesos, cuesta la parte de tu vida que tuviste que entregar para ganarlos. La aplicación se inspira en *Your Money or Your Life* (Vicki Robin y Joe Dominguez) y en las reflexiones de José Mujica, y desarma la ilusión del sueldo nominal con tres conceptos:
+El precio de una etiqueta engaña: un teléfono no "cuesta" 2.600.000 pesos, cuesta la parte de tu vida que tuviste que entregar para ganarlos. La aplicación se inspira en _Your Money or Your Life_ (Vicki Robin y Joe Dominguez) y en las reflexiones de José Mujica, y desarma la ilusión del sueldo nominal con tres conceptos:
 
 - **Tarifa hora nominal**: lo que parece que ganas por hora (ingreso bruto dividido entre las horas pagadas).
 - **Tarifa hora real**: lo que de verdad te queda por cada hora de vida que dedicas al trabajo. Al ingreso se le restan impuestos, transporte y otros gastos que solo existen porque trabajas, y a las horas pagadas se les suman las que no te pagan: traslados y preparación.
@@ -24,25 +30,28 @@ Con la tarifa real, cada artículo se traduce en horas, días laborales y fracci
 ## Funcionalidades
 
 ### Escenarios
+
 - Cada escenario es un perfil financiero con su propia moneda. Hay 8 disponibles: USD, COP, CAD, EUR, MXN, CLP, ARS y GBP.
 - El ingreso se define como **sueldo mensual** o **tarifa por hora**, junto con las horas laborales por semana.
 - Deducciones y gastos mensuales: impuestos y deducciones (salud, pensión, renta), transporte, y otros gastos del empleo (almuerzos fuera, ropa, herramientas).
 - Horas semanales no pagadas: traslados (ida y vuelta) y preparación.
 - Métricas en vivo: tarifa hora real, tarifa nominal, brecha real (%), ingreso bruto, ingreso neto de bolsillo, tiempo total dedicado al trabajo (horas laborales más horas de viaje) y porcentaje del ingreso que se va en trabajar.
 - Los escenarios se pueden crear (en blanco o copiando la configuración y los artículos de otro), renombrar, duplicar y eliminar. Siempre queda al menos uno.
-- La primera vez se cargan dos escenarios de ejemplo: *Mi perfil en Colombia* (COP, sueldo mensual) y *Mi proyección en Canadá* (CAD, tarifa por hora).
+- La primera vez se cargan dos escenarios de ejemplo: _Mi perfil en Colombia_ (COP, sueldo mensual) y _Mi proyección en Canadá_ (CAD, tarifa por hora).
 
 ### Artículos y gastos
+
 - Cada artículo tiene nombre, precio, categoría y emoji. Las categorías son: Tecnología, Ropa y Calzado, Alimentación y Salidas, Transporte y Viajes, Vivienda y Hogar, Suscripciones y Ocio, Salud y Cuidado, y Otros.
 - La tarjeta de cada artículo muestra:
   - las horas (o minutos) de vida que cuesta, los días laborales y las semanas;
-  - una etiqueta de intensidad: *Fácil Adquisición*, *Gasto Moderado*, *Esfuerzo Mayor* o *Alto Sacrificio*;
+  - una etiqueta de intensidad: _Fácil Adquisición_, _Gasto Moderado_, _Esfuerzo Mayor_ o _Alto Sacrificio_;
   - una barra con el porcentaje de un mes laboral de referencia de 160 h, que avisa cuando el artículo lo supera;
   - un texto que describe el esfuerzo en términos cotidianos (por ejemplo, "si empiezas el lunes a las 8:00 AM, trabajarás hasta el viernes…").
 - Los artículos se pueden buscar por nombre, filtrar por categoría, añadir, editar, duplicar y eliminar.
 - El formulario del artículo muestra el costo en tiempo mientras escribes el precio.
 
 ### Comparativa General
+
 - **Un mismo artículo, distintas vidas**: eliges un escenario de referencia y un artículo, y ves cuánto tiempo de vida cuesta en cada escenario. Indica cuántas veces más caro es en el escenario más costoso y cuántas horas ahorras o pierdes frente a la referencia.
   - Los artículos con el mismo nombre en varios escenarios se agrupan y se comparan con el precio local de cada uno.
   - También puedes comparar un artículo propio con un precio y una moneda que tú indicas. En ese caso el precio se convierte a la moneda de cada escenario con las tasas de cambio.
@@ -50,12 +59,14 @@ Con la tarifa real, cada artículo se traduce en horas, días laborales y fracci
 - **Matriz Financiera & Descuento de Realidad**: una tabla con ingreso nominal, deducciones y gastos, horas de viaje al mes, tarifa nominal, tarifa real y descuento de realidad de cada escenario.
 
 ### Tasas de cambio globales
+
 - Las tasas son las mismas para todos los escenarios y se guardan como "unidades de cada moneda por 1 USD".
 - El botón **Actualizar tasas** descarga las tasas vigentes de [open.er-api.com](https://open.er-api.com/v6/latest/USD).
 - Las tasas se pueden editar a mano respecto a una **moneda de referencia** elegible. El panel solo muestra las monedas que usan tus escenarios.
 - El panel indica el origen de las tasas: valores aproximados de ejemplo (para usar la app sin conexión), descargadas (con la fecha) o editadas a mano.
 
 ### Datos y experiencia
+
 - **Exportar e importar** todos los escenarios en un archivo JSON (`costo-de-vida-tiempo-AAAA-MM-DD.json`). Exportar no incluye las tasas de cambio.
 - **Restablecer** los escenarios de ejemplo.
 - **Tema claro y oscuro**. La primera vez se respeta la preferencia del sistema.
@@ -68,11 +79,11 @@ Con la tarifa real, cada artículo se traduce en horas, días laborales y fracci
 
 La lógica está en [`src/utils/calculations.ts`](src/utils/calculations.ts).
 
-| Constante | Valor | Uso |
-|---|---|---|
-| `WEEKS_PER_MONTH` | `4.3333` | Pasa las horas semanales a mensuales |
-| `STANDARD_WORKDAY_HOURS` | `8` | Duración de una jornada laboral |
-| `STANDARD_WORKWEEK_HOURS` | `40` | Duración de una semana laboral |
+| Constante                 | Valor    | Uso                                  |
+| ------------------------- | -------- | ------------------------------------ |
+| `WEEKS_PER_MONTH`         | `4.3333` | Pasa las horas semanales a mensuales |
+| `STANDARD_WORKDAY_HOURS`  | `8`      | Duración de una jornada laboral      |
+| `STANDARD_WORKWEEK_HOURS` | `40`     | Duración de una semana laboral       |
 
 ```text
 Horas pagadas/mes      = horas laborales semanales × 4.3333
@@ -93,19 +104,19 @@ Semanas laborales      = horas / 40
 Meses laborales        = horas / (40 × 4.3333)
 ```
 
-Intensidad del artículo según sus horas: menos de 4 h es *baja*, de 4 a 16 h *moderada*, de más de 16 a 80 h *alta* y más de 80 h *crítica*.
+Intensidad del artículo según sus horas: menos de 4 h es _baja_, de 4 a 16 h _moderada_, de más de 16 a 80 h _alta_ y más de 80 h _crítica_.
 
 Conversión de moneda ([`src/utils/exchangeRates.ts`](src/utils/exchangeRates.ts)): `monto / tasa[origen] × tasa[destino]`, con todas las tasas expresadas en unidades por 1 USD.
 
 ## Stack
 
-| Tecnología | Versión (`package.json`) |
-|---|---|
-| [Preact](https://preactjs.com/) | `^10.29.8` |
-| [TypeScript](https://www.typescriptlang.org/) | `~6.0.3` |
-| [Vite](https://vite.dev/) + `@preact/preset-vite` | `^8.3.4` / `^2.10.6` |
-| [lucide-preact](https://lucide.dev/) (iconos) | `^1.61.0` |
-| [canvas-confetti](https://github.com/catdad/canvas-confetti) | `^1.9.4` |
+| Tecnología                                                   | Versión (`package.json`) |
+| ------------------------------------------------------------ | ------------------------ |
+| [Preact](https://preactjs.com/)                              | `^10.29.8`               |
+| [TypeScript](https://www.typescriptlang.org/)                | `~6.0.3`                 |
+| [Vite](https://vite.dev/) + `@preact/preset-vite`            | `^8.3.4` / `^2.10.6`     |
+| [lucide-preact](https://lucide.dev/) (iconos)                | `^1.61.0`                |
+| [canvas-confetti](https://github.com/catdad/canvas-confetti) | `^1.9.4`                 |
 
 No hay backend: es una aplicación estática que se ejecuta por completo en el navegador.
 
@@ -122,11 +133,11 @@ cd costo_vida
 pnpm install
 ```
 
-| Comando | Descripción |
-|---|---|
-| `pnpm dev` | Inicia el servidor de desarrollo de Vite |
-| `pnpm build` | Comprueba los tipos (`tsc -b`) y genera la versión de producción en `dist/` |
-| `pnpm preview` | Sirve localmente la versión de producción ya generada |
+| Comando        | Descripción                                                                 |
+| -------------- | --------------------------------------------------------------------------- |
+| `pnpm dev`     | Inicia el servidor de desarrollo de Vite                                    |
+| `pnpm build`   | Comprueba los tipos (`tsc -b`) y genera la versión de producción en `dist/` |
+| `pnpm preview` | Sirve localmente la versión de producción ya generada                       |
 
 ## Estructura del proyecto
 
